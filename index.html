@@ -77,15 +77,25 @@ button:hover{
 
 .photoWrap{
   display:none;
-  margin-top:20px;
+  margin-top:12px; /* less space above image */
 }
 
 .photoBox{
   width:100%;
-  aspect-ratio:4/5;
+  max-height:420px; /* prevents pushing too low */
   overflow:hidden;
   border-radius:22px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
 }
+
+#animatedGirl{
+  width:85%; /* slightly smaller so it sits higher */
+  animation: playfulShake 1.2s ease-in-out infinite;
+  transform-origin:50% 35%;
+}
+
 
 /* CARTOON ANIMATION */
 
@@ -196,3 +206,4 @@ yesBtn.addEventListener("click",()=>{
 
 </body>
 </html>
+
