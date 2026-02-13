@@ -18,9 +18,9 @@ body{
   margin:0;
   min-height:100vh;
   display:flex;
-  align-items:flex-start;     /* <-- moved card higher */
+  align-items:flex-start;
   justify-content:center;
-  padding-top:60px;           /* <-- distance from top */
+  padding-top:60px;
   font-family: ui-sans-serif, system-ui;
   background:
     radial-gradient(1200px 800px at 20% 20%, var(--bg2), transparent 60%),
@@ -34,7 +34,7 @@ body{
   background:#ffffffdd;
   backdrop-filter:blur(10px);
   border-radius:26px;
-  padding:20px 30px 15px 30px;  /* <-- tighter padding */
+  padding:20px 30px 15px 30px;
   text-align:center;
   position:relative;
   z-index:2;
@@ -85,25 +85,42 @@ button:hover{
   display:flex;
   justify-content:center;
   align-items:flex-start;
+  position:relative;     /* layering for slideshow */
+  min-height:420px;      /* keeps layout stable so card doesn't jump */
 }
 
-/* CARTOON ANIMATION + POSITION */
-#animatedGirl{
+/* Slides */
+.slide{
+  position:absolute;
+  top:0;
+  left:50%;
+  transform:translateX(-50%);
   width:75%;
-  margin-top:-10px; /* <-- pulls image upward */
-  animation: playfulShake 1.2s ease-in-out infinite;
+  margin-top:-10px;      /* pulls images upward */
+  opacity:0;
+  transition: opacity 600ms ease;
+  pointer-events:none;
+}
+
+.slide.active{
+  opacity:1;
+}
+
+/* Head shake only for first slide */
+.shake{
   transform-origin:50% 30%;
+  animation: playfulShake 1.2s ease-in-out infinite;
 }
 
 /* HEAD SHAKE */
 @keyframes playfulShake{
-  0%   { transform:rotate(0deg) translateY(0px); }
-  15%  { transform:rotate(8deg) translateY(-6px); }
-  30%  { transform:rotate(-8deg) translateY(0px); }
-  45%  { transform:rotate(6deg) translateY(-4px); }
-  60%  { transform:rotate(-6deg) translateY(0px); }
-  75%  { transform:rotate(4deg) translateY(-2px); }
-  100% { transform:rotate(0deg) translateY(0px); }
+  0%   { transform: translateX(-50%) rotate(0deg) translateY(0px); }
+  15%  { transform: translateX(-50%) rotate(8deg) translateY(-6px); }
+  30%  { transform: translateX(-50%) rotate(-8deg) translateY(0px); }
+  45%  { transform: translateX(-50%) rotate(6deg) translateY(-4px); }
+  60%  { transform: translateX(-50%) rotate(-6deg) translateY(0px); }
+  75%  { transform: translateX(-50%) rotate(4deg) translateY(-2px); }
+  100% { transform: translateX(-50%) rotate(0deg) translateY(0px); }
 }
 
 /* HEARTS */
@@ -152,14 +169,16 @@ button:hover{
 
 <div class="card">
   <h1>Sevgililer Günü 2026</h1>
-  <div class="msg">seni çoooookkkkkkkk seviyorummmmmmmmm &lt;3 Every Day is Vuslyyyyy Day</div>
-  <div class="question">BE MY BABYYYY? - kaan</div>
-  <button id="yesBtn">YESSS 💘</button>
+  <div class="msg">seni çoooooookkkkkkk seviyorummmmmmmmm &lt;3 Vuslyyyyy Day</div>
+  <div class="question">BE MY BABYYYYY? -kaan</div>
+
+  <button id="yesBtn">YESSSSSS 💘</button>
 
   <div class="photoWrap" id="photoWrap">
     <div class="photoBox">
-      <!-- Put cartoon.png in the same folder as index.html -->
-      <img id="animatedGirl" src="cartoon.png" alt="Biz">
+      <!-- Both images must be in the same folder as index.html -->
+      <img id="img1" class="slide shake" src="cartoon.png" alt="Cartoon" />
+      <img id="img2" class="slide" src="couple.png" alt="Couple" />
     </div>
   </div>
 </div>
@@ -169,22 +188,63 @@ const yesBtn = document.getElementById("yesBtn");
 const photoWrap = document.getElementById("photoWrap");
 const heartsLayer = document.getElementById("hearts");
 
+const img1 = document.getElementById("img1");
+const img2 = document.getElementById("img2");
+
+let heartsStarted = false;
+let slideTimer = null;
+
 function spawnHeart(){
   const h = document.createElement("div");
-  h.className="heart";
-  h.style.left = (Math.random()*100) + "vw";
-  h.style.animationDuration = (3 + Math.random()*3) + "s";
+  h.className = "heart";
+  h.style.left = (Math.random() * 100) + "vw";
+  h.style.animationDuration = (3 + Math.random() * 3) + "s";
   heartsLayer.appendChild(h);
-  setTimeout(()=>h.remove(), 6500);
+  setTimeout(() => h.remove(), 6500);
 }
 
 function startHearts(){
+  if (heartsStarted) return;
+  heartsStarted = true;
+
+  // initial burst
   for(let i=0;i<30;i++) spawnHeart();
-  setInterval(()=>{
+
+  // continuous
+  setInterval(() => {
     for(let i=0;i<4;i++) spawnHeart();
   }, 250);
 }
 
-yesBtn.addEventListener("click",()=>{
-  photoWrap.style.display="block";
+function startSlideshow(){
+  // show first image initially
+  img1.classList.add("active");
+  img2.classList.remove("active");
+
+  let showFirst = true;
+
+  if (slideTimer) clearInterval(slideTimer);
+  slideTimer = setInterval(() => {
+    showFirst = !showFirst;
+    if (showFirst) {
+      img1.classList.add("active");
+      img2.classList.remove("active");
+    } else {
+      img2.classList.add("active");
+      img1.classList.remove("active");
+    }
+  }, 2500); // change every 2.5s
+}
+
+yesBtn.addEventListener("click", () => {
+  photoWrap.style.display = "block";
   startHearts();
+  startSlideshow();
+
+  yesBtn.textContent = "YAYYYY 💞";
+  yesBtn.disabled = true;
+});
+</script>
+
+</body>
+</html>
